@@ -43,7 +43,7 @@ p_keep_hidden = tf.placeholder("float", name="p_keep_hidden")
 py_x = model(X, w_h, w_h2, w_o, p_keep_input, p_keep_hidden)
 
 #Step 7 Create cost function
-with tf.name_scope"cost"):
+with tf.name_scope("cost"):
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(py_x, Y))
     train_op = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
     # Add scalar summary for cost tensor
