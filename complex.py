@@ -34,7 +34,7 @@ def train():
 
   with tf.name_scope('input_reshape'):
     image_shaped_input = tf.reshape(x, [-1, 28, 28, 1])
-    tf.image_summary('input', image_shaped_input, 10)
+    tf.summary.image('input', image_shaped_input, 10)
 
   # We can't initialize these variables to 0 - the network will get stuck.
   def weight_variable(shape):
@@ -51,13 +51,13 @@ def train():
     """Attach a lot of summaries to a Tensor."""
     with tf.name_scope('summaries'):
       mean = tf.reduce_mean(var)
-      tf.scalar_summary('mean/' + name, mean)
+      tf.summary.scalar('mean/' + name, mean)
       with tf.name_scope('stddev'):
         stddev = tf.sqrt(tf.reduce_mean(tf.square(var - mean)))
-      tf.scalar_summary('stddev/' + name, stddev)
-      tf.scalar_summary('max/' + name, tf.reduce_max(var))
-      tf.scalar_summary('min/' + name, tf.reduce_min(var))
-      tf.histogram_summary(name, var)
+      tf.summary.scalar('stddev/' + name, stddev)
+      tf.summary.scalar('max/' + name, tf.reduce_max(var))
+      tf.summary.scalar('min/' + name, tf.reduce_min(var))
+      tf.summary.histogram(name, var)
 
   def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
     """Reusable code for making a simple neural net layer.
@@ -76,16 +76,16 @@ def train():
         variable_summaries(biases, layer_name + '/biases')
       with tf.name_scope('Wx_plus_b'):
         preactivate = tf.matmul(input_tensor, weights) + biases
-        tf.histogram_summary(layer_name + '/pre_activations', preactivate)
+        tf.summary.histogram(layer_name + '/pre_activations', preactivate)
       activations = act(preactivate, name='activation')
-      tf.histogram_summary(layer_name + '/activations', activations)
+      tf.summary.histogram(layer_name + '/activations', activations)
       return activations
 
   hidden1 = nn_layer(x, 784, 500, 'layer1')
 
   with tf.name_scope('dropout'):
     keep_prob = tf.placeholder(tf.float32)
-    tf.scalar_summary('dropout_keep_probability', keep_prob)
+    tf.summary.scalar('dropout_keep_probability', keep_prob)
     dropped = tf.nn.dropout(hidden1, keep_prob)
 
   y = nn_layer(dropped, 500, 10, 'layer2', act=tf.nn.softmax)
@@ -94,7 +94,7 @@ def train():
     diff = y_ * tf.log(y)
     with tf.name_scope('total'):
       cross_entropy = -tf.reduce_mean(diff)
-    tf.scalar_summary('cross entropy', cross_entropy)
+    tf.summary.scalar('cross entropy', cross_entropy)
 
   with tf.name_scope('train'):
     train_step = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(
@@ -105,13 +105,13 @@ def train():
       correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
     with tf.name_scope('accuracy'):
       accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    tf.scalar_summary('accuracy', accuracy)
+    tf.summary.scalar('accuracy', accuracy)
 
   # Merge all the summaries and write them out to /tmp/mnist_logs (by default)
-  merged = tf.merge_all_summaries()
-  train_writer = tf.train.SummaryWriter(FLAGS.summaries_dir + '/train',
+  merged = tf.summary.merge_all()
+  train_writer = tf.summary.FileWriter(FLAGS.summaries_dir + '/train',
                                         sess.graph)
-  test_writer = tf.train.SummaryWriter(FLAGS.summaries_dir + '/test')
+  test_writer = tf.summary.FileWriter(FLAGS.summaries_dir + '/test')
   tf.initialize_all_variables().run()
 
   # Train the model, and also write summaries.
