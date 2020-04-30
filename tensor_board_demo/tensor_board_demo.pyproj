@@ -23,7 +23,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="complex.py" />
-    <Compile Include="input_data.py" />
     <Compile Include="simple.py" />
   </ItemGroup>
   <ItemGroup>

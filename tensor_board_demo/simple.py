@@ -2,12 +2,17 @@
 DOCSTRING
 """
 import tensorflow as tf
-import tensorflow.examples.tutorials.mnist as mnist_data
 
 def init_weights(shape, name):
+    """
+    DOCSTRING
+    """
     return tf.Variable(tf.random_normal(shape, stddev=0.01), name=name)
 
 def model(X, w_h, w_h2, w_o, p_keep_input, p_keep_hidden):
+    """
+    DOCSTRING
+    """
     with tf.name_scope("layer1"):
         X = tf.nn.dropout(X, p_keep_input)
         h = tf.nn.relu(tf.matmul(X, w_h))
@@ -18,8 +23,7 @@ def model(X, w_h, w_h2, w_o, p_keep_input, p_keep_hidden):
         h2 = tf.nn.dropout(h2, p_keep_hidden)
         return tf.matmul(h2, w_o)
 
-mnist = mnist_data.input_data.read_data_sets("MNIST_data/", one_hot=True)
-trX, trY, teX, teY = mnist.train.images, mnist.train.labels, mnist.test.images, mnist.test.labels
+(trX, trY), (teX, teY) = tf.keras.datasets.mnist.load_data()
 
 X = tf.placeholder("float", [None, 784], name="X")
 Y = tf.placeholder("float", [None, 10], name="Y")
@@ -41,12 +45,10 @@ with tf.name_scope("cost"):
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(py_x, Y))
     train_op = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
     tf.scalar_summary("cost", cost)
-
 with tf.name_scope("accuracy"):
     correct_pred = tf.equal(tf.argmax(Y, 1), tf.argmax(py_x, 1))
     acc_op = tf.reduce_mean(tf.cast(correct_pred, "float"))
     tf.scalar_summary("accuracy", acc_op)
-
 with tf.Session() as sess:
     writer = tf.train.SummaryWriter("./logs/nn_logs", sess.graph)
     merged = tf.merge_all_summaries()
